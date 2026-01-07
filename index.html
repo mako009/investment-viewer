@@ -396,7 +396,7 @@
     // ==========================================
     // 設定
     // ==========================================
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbygeU1cHx94ol2KY7w8BRgBVgALjFbEFFHRQXJe1DxXrbu_6Z7dtNfHkQJoLY9keGDn/exec'; // デプロイ後に設定
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbygeU1cHx94ol2KY7w8BRgBVgALjFbEFFHRQXJe1DxXrbu_6Z7dtNfHkQJoLY9keGDn/exec';
     
     let currentView = 'research';
     let archiveData = { research: [], news: [], performance: [] };
@@ -467,18 +467,20 @@
     }
     
     // ==========================================
-    // アーカイブデータ読み込み
+    // アーカイブデータ読み込み（JSONP方式）
     // ==========================================
-    async function loadArchiveData() {
-      try {
-        const response = await fetch(`${GAS_URL}?action=getArchive`);
-        const data = await response.json();
+    function loadArchiveData() {
+      window.handleArchiveData = function(data) {
         archiveData = data;
         updateDateNav();
-      } catch (e) {
-        console.error('Archive load error:', e);
-        // フォールバック: ローカルストレージから
-      }
+      };
+      
+      const script = document.createElement('script');
+      script.src = `${GAS_URL}?action=getArchive&callback=handleArchiveData`;
+      script.onerror = function() {
+        console.error('Archive load error');
+      };
+      document.body.appendChild(script);
     }
     
     // ==========================================
